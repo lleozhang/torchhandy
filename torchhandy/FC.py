@@ -1,39 +1,6 @@
 import torch.nn as nn
 import torch
-
-def select_activation(activation):
-    act = None
-    if activation == 'relu':
-        act = nn.ReLU()
-    elif activation == 'sigmoid':
-        act = nn.Sigmoid()
-    elif activation == 'tanh':
-        act = nn.Tanh()
-    elif activation == 'softmax':
-        act = nn.Softmax()
-    elif activation == 'elu':
-        act = nn.ELU()
-    elif activation == 'leakyrelu':
-        act = nn.LeakyReLU()
-    elif activation == 'gelu':
-        act = nn.GELU()
-        
-    return act
-
-
-def select_normalization(normalization):
-    norm = None
-    try:
-        if normalization[0] == 1:
-            norm = nn.BatchNorm1d(normalization[1])
-        elif normalization[0] == 2:
-            norm = nn.BatchNorm2d(normalization[1])
-        elif normalization[0] == 0:
-            norm = nn.LayerNorm(normalization[1])    
-    except Exception as e:
-        raise Warning("No or unsupported normalization type given!")
-
-    return norm
+from .utils import select_activation, select_normalization
 
 '''
     This is a module of a fully connected layer with optional dropout, bias, normalization, 

@@ -46,4 +46,44 @@ def cha2fea(x):
     y = x.transpose(1, 2).transpose(2, 3).reshape(-1, H * W, C)
     return y 
 
-   
+def select_activation(activation):
+    act = None
+    if activation == 'relu':
+        act = nn.ReLU()
+    elif activation == 'sigmoid':
+        act = nn.Sigmoid()
+    elif activation == 'tanh':
+        act = nn.Tanh()
+    elif activation == 'softmax':
+        act = nn.Softmax()
+    elif activation == 'elu':
+        act = nn.ELU()
+    elif activation == 'leakyrelu':
+        act = nn.LeakyReLU()
+    elif activation == 'gelu':
+        act = nn.GELU()
+        
+    return act
+
+
+def select_normalization(normalization):
+    norm = None
+    try:
+        if normalization[0] == 1:
+            norm = nn.BatchNorm1d(normalization[1])
+        elif normalization[0] == 2:
+            norm = nn.BatchNorm2d(normalization[1])
+        elif normalization[0] == 0:
+            norm = nn.LayerNorm(normalization[1])    
+    except Exception as e:
+        raise Warning("No or unsupported normalization type given!")
+
+    return norm
+
+def get_mask(seq_len):
+    '''
+        Get a typical GPT attention mask.
+    '''
+    mask0 = torch.full((seq_len, seq_len), -float('inf'))
+    mask1 = torch.triu(mask0, diagonal = 1)
+    return mask1
