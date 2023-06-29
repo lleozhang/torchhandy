@@ -76,7 +76,7 @@ def select_normalization(normalization):
         elif normalization[0] == 0:
             norm = nn.LayerNorm(normalization[1])    
     except Exception as e:
-        raise Warning("No or unsupported normalization type given!")
+        print("warning: No or unsupported normalization type given!")
 
     return norm
 
