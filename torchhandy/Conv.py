@@ -67,23 +67,23 @@ class SConv(nn.Module):
     This is a conv module with self-attention layers.
 '''
 class Att_Conv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, num_heads, dropout,
+    def __init__(self, in_channels, out_channels, kernel_size, siz, num_heads, dropout,
                 normalization = None, activation = 'relu', res_connection = True):
         nn.Module.__init__(self)
         
-        self.conv1 = Res_Conv(in_channels, out_channels, kernel_size, 
+        self.conv1 = SConv(in_channels, out_channels, kernel_size, 
                            normalization, activation, res_connection)
-        self.conv2 = Res_Conv(out_channels, out_channels, kernel_size, 
+        self.conv2 = SConv(out_channels, out_channels, kernel_size, 
                            normalization, activation, res_connection)
-        self.norm = select_normalization(normalization)
+        self.norm = nn.LayerNorm((siz * siz, out_channels))
         self.att = nn.MultiheadAttention(out_channels, num_heads, dropout, batch_first = True)
         
     def forward(self, x):
         fea = self.conv1(x)
         a_fea = cha2fea(fea)
         att_out, _ = self.att(a_fea, a_fea, a_fea)
-        att_out = fea2cha(att_out)
-        fea = fea + att_out
+        fea = a_fea + att_out
         if self.norm:
             fea = self.norm(fea)
+        fea = fea2cha(fea)
         return self.conv2(fea)
