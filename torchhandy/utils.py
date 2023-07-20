@@ -2,6 +2,7 @@ import torch
 import os
 import torch.nn as nn
 import math
+import time
 
 def clear_cuda():
     '''
@@ -13,7 +14,7 @@ def clear_cuda():
     torch.cuda.empty_cache()
     torch.cuda.empty_cache()
     torch.cuda.empty_cache()
-    os.sleep(5)
+    time.sleep(5)
     torch.cuda.empty_cache()
     torch.cuda.empty_cache()
     torch.cuda.empty_cache()
@@ -76,7 +77,7 @@ def select_normalization(normalization):
         elif normalization[0] == 0:
             norm = nn.LayerNorm(normalization[1])    
     except Exception as e:
-        print("warning: No or unsupported normalization type given!")
+        pass
 
     return norm
 

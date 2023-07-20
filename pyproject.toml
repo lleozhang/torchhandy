@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "torchhandy"
-version = "0.0.2"
+version = "0.0.4"
 authors = [
   { name="张荟萱", email="pkuleozhang@gmail.com"},
 ]
@@ -20,7 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-        "torch>=1.6.0",
+        "torch>=2.0.0",
     ]
 
 [project.urls]
