@@ -132,7 +132,7 @@ class Trainer(object):
         ed_time = time.time()
         dur = ed_time - st_time
         self.trainer.call_func(print, f'this epoch cost {dur} seconds, which is {dur / 60} minutes or {dur / 3600} hours')
-        self.trainer.call_func(self.model.generate_cases, dataset, 1, 
+        self.trainer.call_func(self.trainer.get_model(self.model).generate_cases, dataset, 1, 
                             self.trainer.get_device(), f'{self.model_name}_{type}_{epoch}')
         
     def train_model(self):
