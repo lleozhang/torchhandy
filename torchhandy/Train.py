@@ -20,7 +20,7 @@ class Trainer(object):
         self.best_path = trainconfig.best_path
         self.model_name = trainconfig.model_name
         
-        self.model = model
+        self.model = self.trainer.model_parallel(model)
         self.start_epoch = 0
         self.lr = trainconfig.lr
         self.weight_decay = trainconfig.weight_decay
