@@ -15,26 +15,43 @@ class Diffusion(object):
             assert(self.betas[-1] == self.end_beta)
         except Exception as e:
             self.betas = np.linspace(self.end_beta, self.begin_beta, num = self.steps)
-            np.save(self.betas, config.beta_path)
+            np.save(config.beta_path, self.betas)
         
         self.betas = torch.tensor(self.betas)
         self.alphas = 1 - self.betas
         self.alpha_mul = torch.cumprod(self.alphas, dim = 0)
         
-    def add_noise(self, x):
+    def add_noise(self, x, device):
+        self = self.to(device)
+        x = x.to(device)
+        
         bsz = x.shape[0]
-        tim = torch.randint(0, self.steps, (bsz, ))
-        alpha_muls = torch.gather(self.alpha_mul, dim = 0, index = tim)
-        noise = torch.randn_like(x)
-        noised_x = torch.sqrt(alpha_muls) * x + torch.sqrt(1 - alpha_muls) * noise
-        return noised_x, noise, tim
+        ori_shape = x.shape
+        x = x.reshape(bsz, -1)
 
-    def denoise(self, x, tim, model, device):
-        step = tim[0].item()
-        pred_noise = model(x, tim, device)
-        x_now = (x - self.beta[step] * pred_noise / (torch.sqrt(1 - self.alpha_mul[step]))) * torch.sqrt(1 / self.alpha[step]) 
+        tim = torch.randint(0, self.steps, (bsz, )).to(device)
+        alpha_muls = torch.gather(self.alpha_mul, dim = 0, index = tim).to(device).unsqueeze(1)
+        noise = torch.randn_like(x).to(device)
+        noised_x = torch.sqrt(alpha_muls) * x + torch.sqrt(1 - alpha_muls) * noise
+        
+        noised_x = noised_x.reshape(*ori_shape)
+        noise = noise.reshape(*ori_shape)
+        return noised_x.detach().to(torch.float), noise.detach().to(torch.float), tim.detach()
+
+    def to(self, device):
+        self.alphas = self.alphas.to(device)
+        self.betas = self.betas.to(device)
+        self.alpha_mul = self.alpha_mul.to(device)
+        return self
+
+    def denoise(self, x, step, pred_noise, device):
+        x = x.to(device)
+        pred_noise = pred_noise.to(device)
+        self = self.to(device)
+        
+        x_now = (x - self.betas[step] * pred_noise / (torch.sqrt(1 - self.alpha_mul[step]))) * torch.sqrt(1 / self.alphas[step]) 
         if step > 0:
-            z = torch.randn_like(x)
-            x_now += torch.sqrt((1 - self.alpha_mul[step - 1]) / (1 - self.alpha_mul[step]) * self.beta[step]) * z
+            z = torch.randn_like(x).to(device)
+            x_now += torch.sqrt((1 - self.alpha_mul[step - 1]) / (1 - self.alpha_mul[step]) * self.betas[step]) * z
         return pred_noise, x_now
         

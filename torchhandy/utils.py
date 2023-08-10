@@ -76,6 +76,9 @@ def select_normalization(normalization):
             norm = nn.BatchNorm2d(normalization[1])
         elif normalization[0] == 0:
             norm = nn.LayerNorm(normalization[1])    
+        elif normalization[0] == -1:
+            norm = nn.GroupNorm(num_groups = normalization[1], 
+                                num_channels = normalization[2])
     except Exception as e:
         pass
 
