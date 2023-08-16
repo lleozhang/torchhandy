@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "torchhandy"
-version = "0.0.7"
+version = "0.0.8"
 authors = [
   { name="张荟萱", email="pkuleozhang@gmail.com"},
 ]
@@ -24,4 +24,4 @@ dependencies = [
     ]
 
 [project.urls]
-"Homepage" = "https://github.com/NickYi1990/juans"
+"Homepage" = "https://github.com/lleozhang/torchhandy"

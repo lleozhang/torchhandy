@@ -91,3 +91,21 @@ def get_mask(seq_len):
     mask0 = torch.full((seq_len, seq_len), -float('inf'))
     mask1 = torch.triu(mask0, diagonal = 1)
     return mask1
+
+def exists(x):
+    '''
+        Check whether the input is NoneType.
+    '''
+    return x is not None
+
+def timer_func(func):
+    '''
+        A basic timing function.
+    '''
+    def call(*args, **kwargs):
+        st = time.time()
+        func(*args, **kwargs)
+        ed = time.time()
+        dur = ed - st
+        print(f"time {dur} seconds costed, which is {dur / 60} minutes or {dur / 3600} hours")
+    return call

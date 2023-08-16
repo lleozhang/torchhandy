@@ -28,10 +28,10 @@ class Res_Conv(nn.Module):
             output = self.act(output)
             
         output = self.conv2(output)
-        if self.in_channels == self.out_channels:
-            output = output + x
         if self.norm:
             output = self.norm(output)
+        if self.in_channels == self.out_channels:
+            output = output + x
         if self.act:
             output = self.act(output)
         return output
@@ -82,8 +82,8 @@ class Att_Conv(nn.Module):
         fea = self.conv1(x)
         a_fea = cha2fea(fea)
         att_out, _ = self.att(a_fea, a_fea, a_fea)
-        fea = a_fea + att_out
+        fea = att_out
         if self.norm:
-            fea = self.norm(fea)
+            fea = self.norm(fea) + a_fea
         fea = fea2cha(fea)
         return self.conv2(fea)

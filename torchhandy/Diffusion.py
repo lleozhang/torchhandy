@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+from .utils import exists
 
 class Diffusion(object):
     def __init__(self, config):
@@ -21,7 +22,7 @@ class Diffusion(object):
         self.alphas = 1 - self.betas
         self.alpha_mul = torch.cumprod(self.alphas, dim = 0)
         
-    def add_noise(self, x, device):
+    def add_noise(self, x, device, given_tim = None):
         self = self.to(device)
         x = x.to(device)
         
@@ -30,6 +31,8 @@ class Diffusion(object):
         x = x.reshape(bsz, -1)
 
         tim = torch.randint(0, self.steps, (bsz, )).to(device)
+        if exists(given_tim):
+            tim = torch.tensor(given_tim).to(device)
         alpha_muls = torch.gather(self.alpha_mul, dim = 0, index = tim).to(device).unsqueeze(1)
         noise = torch.randn_like(x).to(device)
         noised_x = torch.sqrt(alpha_muls) * x + torch.sqrt(1 - alpha_muls) * noise
