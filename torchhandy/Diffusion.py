@@ -8,12 +8,13 @@ class Diffusion(object):
         self.steps = config.steps
         
         try:
-            self.alpha_mul = np.load(config.alpha_mul_path)
+            self.alpha_mul = torch.tensor(np.load(config.alpha_mul_path))
             assert(len(self.alpha_mul) == self.steps)
             
         except Exception as e:
             if config.sample_strategy == 'linear':
                 self.betas = np.linspace(config.begin_beta, config.end_beta, config.steps)
+                self.betas = torch.tensor(self.betas)
                 self.alphas = 1 - self.betas
                 self.alpha_mul = torch.cumprod(self.alphas, dim = 0)
             elif config.sample_strategy == 'cos':
@@ -26,7 +27,7 @@ class Diffusion(object):
         self.betas = 1 - self.alphas
         if config.sample_strategy == 'cos':
             self.betas[self.betas > 0.999] = 0.999
-        np.save(config.alpha_mul_path, self.alpha_mul)
+        np.save(config.alpha_mul_path, self.alpha_mul.numpy())
                 
         
     def add_noise(self, x, device, given_tim = None):
