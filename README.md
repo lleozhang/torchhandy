@@ -1,5 +1,11 @@
 # TorchHandy
 
+## Installation
+
+```bash
+    pip install torchhandy
+```
+
 ## Introduction
 This is a handy implementation of some useful pytorch modules and functions, which can be helpful for both students and researchers, especially in simplifying 
 repeating coding procedure.
@@ -140,5 +146,6 @@ If you forget your session_name, you can call:
     tmux list-sessions
 ```
 
-In tmux, do not scroll your mouse because it has different meanings. If you'd like to view the input and output above, you should call "ctrl+b+[" first. Then you can naturally scroll your mouse to view the input and output. If you want to quit this mode, you should call "ctrl+c" (please be careful because if you press ctrl+c too many times you may accidentally stop the currently running program, which is another sad story.) If you want to quit tmux session, you should call "ctrl+b+d"
+In tmux, do not scroll your mouse because it has different meanings. If you'd like to view the input and output above, you should call "ctrl+b+[" first. Then you can naturally scroll your mouse to view the input and output. If you want to quit this mode, you should call "ctrl+c" (please be careful because if you press ctrl+c too many times you may accidentally stop the currently running program, which is another sad story.) If you want to quit tmux session, you should call "ctrl+b+d". 
 
+One thing you should notice is that in PyTorch < 2.0 the "local_rank" (which is the GPU corresponding to its certain process) is set in command line. However in PyTorch >= 2.0 it's set in environment variables, and this code is written under PyTorch >= 2.0, so if you have PyTorch < 2.0, you may have to modify some part of this code for using. (BTW, this is the only part in this package that requires PyTorch >= 2.0, other parts are safe to use with PyTorch < 2.0, probably...)
