@@ -10,8 +10,8 @@ import time
 '''
 class Swish(nn.Module):
     def __init__(self):
-        self.sig = nn.Sigmoid()
         super().__init__()
+        self.sig = nn.Sigmoid()
     
     def forward(self, x):
         return x * self.sig(x)
