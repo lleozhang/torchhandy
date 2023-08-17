@@ -6,21 +6,28 @@ from .utils import exists
 class Diffusion(object):
     def __init__(self, config):
         self.steps = config.steps
-        self.begin_beta = config.begin_beta
-        self.end_beta = config.end_beta
         
         try:
-            self.betas = np.load(config.beta_path)
-            assert(len(self.betas) == self.steps)
-            assert(self.betas[0] == self.begin_beta)
-            assert(self.betas[-1] == self.end_beta)
+            self.alpha_mul = np.load(config.alpha_mul_path)
+            assert(len(self.alpha_mul) == self.steps)
+            
         except Exception as e:
-            self.betas = np.linspace(self.end_beta, self.begin_beta, num = self.steps)
-            np.save(config.beta_path, self.betas)
+            if config.sample_strategy == 'linear':
+                self.betas = np.linspace(config.begin_beta, config.end_beta, config.steps)
+                self.alphas = 1 - self.betas
+                self.alpha_mul = torch.cumprod(self.alphas, dim = 0)
+            elif config.sample_strategy == 'cos':
+                t = torch.arange(self.steps + 1)
+                f = torch.cos(((t / self.steps + config.bias) / (1 + config.bias) * torch.pi / 2)) ** 2
+                self.alpha_mul = f[1:] / f[0].item()
         
-        self.betas = torch.tensor(self.betas)
-        self.alphas = 1 - self.betas
-        self.alpha_mul = torch.cumprod(self.alphas, dim = 0)
+        self.alphas = self.alpha_mul
+        self.alphas[1:] = self.alpha_mul[1:] / self.alpha_mul[:-1]
+        self.betas = 1 - self.alphas
+        if config.sample_strategy == 'cos':
+            self.betas[self.betas > 0.999] = 0.999
+        np.save(config.alpha_mul_path, self.alpha_mul)
+                
         
     def add_noise(self, x, device, given_tim = None):
         self = self.to(device)

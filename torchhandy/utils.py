@@ -4,6 +4,18 @@ import torch.nn as nn
 import math
 import time
 
+'''
+    This is a wrapped module for swish activation, which is x * sigmoid(x).
+    This is not the simplest implement, but perhaps the most similar to other activations.
+'''
+class Swish(nn.Module):
+    def __init__(self):
+        self.sig = nn.Sigmoid()
+        super().__init__()
+    
+    def forward(self, x):
+        return x * self.sig(x)
+
 def clear_cuda():
     '''
         This function clears out cuda for more spaces. It is extremely useful when you encounter
@@ -48,6 +60,10 @@ def cha2fea(x):
     return y 
 
 def select_activation(activation):
+    '''
+        This is a simple function used for selecting activations, note that all the parameters are not tuneable.
+        activation : 'relu', 'leakyrelu', 'sigmoid', 'tanh', 'softmax', 'elu', 'gelu', 'swish'
+    '''
     act = None
     if activation == 'relu':
         act = nn.ReLU()
@@ -63,11 +79,23 @@ def select_activation(activation):
         act = nn.LeakyReLU()
     elif activation == 'gelu':
         act = nn.GELU()
+    elif activation == 'swish':
+        act = Swish()
         
     return act
 
 
 def select_normalization(normalization):
+    '''
+        This is a wrapped function used for selecting normalization method.
+        normalization : a tuple, the first element indicates the normalization type:
+        0 : layernorm, the second element should be a tuple corresponding to the normalized shape
+        1 : 1d-batchnorm, the second element should be the channels to normalize
+        2 : 2d-batchnorm, similarly the second element should be the channels to normalize
+        -1 : groupnorm, the second element should be the groups and the third element should be the channels to normalize
+                to increase robustness, if channels is not divisible by groups, the groups is modified to the greatest common 
+                divisers(gcd).
+    '''
     norm = None
     try:
         if normalization[0] == 1:
