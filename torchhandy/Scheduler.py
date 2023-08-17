@@ -9,7 +9,7 @@ class Scheduler(object):
         if config.scheduler_type == 'cos_lr':
             self.scheduler = CosineAnnealingLR(optimizer, T_max = config.T_max, eta_min = config.eta_min)
         elif config.scheduler_type == 'step_lr':
-            self.scheduler = StepLR(optimizer, step_size = config.step_size, gamma = config.gamma, last_epoch = config.last_epoch)
+            self.scheduler = StepLR(optimizer, step_size = config.step_size, gamma = config.gamma)
         elif config.scheduler_type == 'const_lr':
             self.scheduler = ConstantLR(optimizer, factor = config.factor, total_iters = config.total_iters)
         else:

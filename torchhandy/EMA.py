@@ -12,12 +12,12 @@ class EMA(object):
     
     def register(self, model):
         for name, para in model.named_parameters():
-            self.shadow[name] = para.data.clone()
-       
+            self.shadow[name] = para.cpu().data.clone()
+        
     def resume(self, ckpt):
         self.total_steps = ckpt['ema_total_steps']
         for k in ckpt['ema_shadow']:
-            self.shadow[k] = ckpt['ema_shadow'][k]
+            self.shadow[k] = ckpt['ema_shadow'][k].cpu()
         
     def update(self, model):
         self.total_steps += 1
@@ -26,21 +26,21 @@ class EMA(object):
         for name, para in model.named_parameters():
             if name not in self.shadow:
                 raise ValueError("unexpected model parameter!")
-            self.shadow[name] = self.alpha * self.shadow[name] + (1 - self.alpha) * para.data.clone()
+            self.shadow[name] = self.alpha * self.shadow[name] + (1 - self.alpha) * para.cpu().data.clone()
         
     def load_model(self, model):
         self.ori = {}
         for name, para in model.named_parameters():
             if name not in self.shadow:
                 raise ValueError("unexpected model parameter!")
-            self.ori[name] = para.data.clone()
-            para.data = self.shadow[name]
+            self.ori[name] = para.cpu().data.clone()
+            para.data = self.shadow[name].to(para.data.device)
 
     def restore_model(self, model):
         for name, para in model.named_parameters():
             if name not in self.shadow or name not in self.ori:
                 raise ValueError("unexpected model parameter or not stored!")
-            para.data = self.ori[name]
+            para.data = self.ori[name].to(para.data.device)
     
     def store_ema(self, ckpt):
         ckpt['ema_total_steps'] = self.total_steps
