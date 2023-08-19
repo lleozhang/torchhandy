@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from .utils import exists
+from copy import deepcopy
 
 class Diffusion(object):
     def __init__(self, config):
@@ -22,13 +23,12 @@ class Diffusion(object):
                 f = torch.cos(((t / self.steps + config.bias) / (1 + config.bias) * torch.pi / 2)) ** 2
                 self.alpha_mul = f[1:] / f[0].item()
         
-        self.alphas = self.alpha_mul
+        self.alphas = deepcopy(self.alpha_mul)
         self.alphas[1:] = self.alpha_mul[1:] / self.alpha_mul[:-1]
         self.betas = 1 - self.alphas
         if config.sample_strategy == 'cos':
             self.betas[self.betas > 0.999] = 0.999
         np.save(config.alpha_mul_path, self.alpha_mul.numpy())
-                
         
     def add_noise(self, x, device, given_tim = None):
         self = self.to(device)
