@@ -27,7 +27,8 @@ class EMA(object):
             if name not in self.shadow:
                 raise ValueError("unexpected model parameter!")
             self.shadow[name] = self.alpha * self.shadow[name] + (1 - self.alpha) * para.cpu().data.clone()
-        
+        return model
+    
     def load_model(self, model):
         self.ori = {}
         for name, para in model.named_parameters():
@@ -35,12 +36,14 @@ class EMA(object):
                 raise ValueError("unexpected model parameter!")
             self.ori[name] = para.cpu().data.clone()
             para.data = self.shadow[name].to(para.data.device)
+        return model
 
     def restore_model(self, model):
         for name, para in model.named_parameters():
             if name not in self.shadow or name not in self.ori:
                 raise ValueError("unexpected model parameter or not stored!")
             para.data = self.ori[name].to(para.data.device)
+        return model
     
     def store_ema(self, ckpt):
         ckpt['ema_total_steps'] = self.total_steps

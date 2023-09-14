@@ -1,20 +1,11 @@
 import torch
 import os
 import torch.nn as nn
+from torchvision.utils import save_image
+from PIL import Image, ImageFile
 import math
 import time
-
-'''
-    This is a wrapped module for swish activation, which is x * sigmoid(x).
-    This is not the simplest implement, but perhaps the most similar to other activations.
-'''
-class Swish(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.sig = nn.Sigmoid()
-    
-    def forward(self, x):
-        return x * self.sig(x)
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def clear_cuda():
     '''
@@ -64,7 +55,7 @@ def select_activation(activation):
         This is a simple function used for selecting activations, note that all the parameters are not tuneable.
         activation : 'relu', 'leakyrelu', 'sigmoid', 'tanh', 'softmax', 'elu', 'gelu', 'swish'
     '''
-    act = None
+    act = nn.Identity()
     if activation == 'relu':
         act = nn.ReLU()
     elif activation == 'sigmoid':
@@ -79,8 +70,8 @@ def select_activation(activation):
         act = nn.LeakyReLU()
     elif activation == 'gelu':
         act = nn.GELU()
-    elif activation == 'swish':
-        act = Swish()
+    elif activation == 'silu':
+        act = nn.SiLU()
         
     return act
 
@@ -96,7 +87,7 @@ def select_normalization(normalization):
                 to increase robustness, if channels is not divisible by groups, the groups is modified to the greatest common 
                 divisers(gcd).
     '''
-    norm = None
+    norm = nn.Identity()
     try:
         if normalization[0] == 1:
             norm = nn.BatchNorm1d(normalization[1])
@@ -137,3 +128,39 @@ def timer_func(func):
         dur = ed - st
         print(f"time {dur} seconds costed, which is {dur / 60} minutes or {dur / 3600} hours")
     return call
+
+def isnan(x):
+    '''
+        Check whether a tensor contains a NAN element.
+    '''
+    return torch.isnan(x).any()
+
+def isinf(x):
+    '''
+        Check whether a tensor contains a INF element.
+    '''
+    return torch.isinf(x).any()
+
+def _save_image(img, path, de_norm = True):
+    '''
+        Save an image to a given path.
+        img: the image to save, a tensor with shape (C, H, W) or (1, C, H, W)
+        path: the path to save the image
+        de_norm: if True, map the elements in img to (0, 1)
+    '''
+    img = img.squeeze(0).detach().cpu().data
+    if de_norm:
+        img = ((img + 1) / 2).clamp(0, 1)
+    save_image(img, path)
+
+def read_image(path, convert = 'RGB', trans = None):
+    '''
+        Read an image.
+        path : the path to read from
+        convert : the type of the image, default RGB
+        trans : how to transform this image
+    '''
+    img = Image.open(path).convert(convert)
+    if exists(trans):
+        img = trans(img)
+    return img

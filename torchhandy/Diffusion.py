@@ -28,6 +28,7 @@ class Diffusion(object):
         self.betas = 1 - self.alphas
         if config.sample_strategy == 'cos':
             self.betas[self.betas > 0.999] = 0.999
+        self.alphas = 1 - self.betas
         np.save(config.alpha_mul_path, self.alpha_mul.numpy())
         
     def add_noise(self, x, device, given_tim = None):
