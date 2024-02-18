@@ -7,15 +7,23 @@ import os
 class Parallel_Trainer(object):
     def __init__(self, synch, config):
         self.synch = synch
+        
+        if isinstance(config, dict):
+            device = config['device']
+            n_gpus = config['n_gpus']
+        else:
+            device = config.device
+            n_gpus = config.n_gpus
+            
         if synch:
             local_rank = int(os.environ['LOCAL_RANK'])
             torch.cuda.set_device(local_rank)
             self.device = torch.device("cuda", local_rank)
             self.local_rank = local_rank
-            torch.distributed.init_process_group("nccl", world_size = config.n_gpus, 
+            torch.distributed.init_process_group("nccl", world_size = n_gpus, 
                                                 rank = local_rank, init_method = 'env://')
         else:
-            self.device = config.device
+            self.device = device
     
     def get_device(self):
         '''

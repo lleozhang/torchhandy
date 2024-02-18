@@ -1,10 +1,10 @@
 import torch
-import os
+import os, shutil
 import torch.nn as nn
+import numpy as np
 from torchvision.utils import save_image
 from PIL import Image, ImageFile
-import math
-import time
+import math, time, random
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def clear_cuda():
@@ -129,6 +129,20 @@ def timer_func(func):
         print(f"time {dur} seconds costed, which is {dur / 60} minutes or {dur / 3600} hours")
     return call
 
+def cuda_timer_func(func):
+    '''
+        A basic timing function for cuda.
+    '''
+    def call(*args, **kwargs):
+        start = torch.cuda.Event(enable_timing = True)
+        end = torch.cuda.Event(enable_timing = True)
+        start.record()
+        func(*args, **kwargs)
+        end.record()
+        dur = end.elapsed_time(start) / 1000
+        print(f"time {dur} seconds costed, which is {dur / 60} minutes or {dur / 3600} hours")
+    return call
+
 def isnan(x):
     '''
         Check whether a tensor contains a NAN element.
@@ -164,3 +178,16 @@ def read_image(path, convert = 'RGB', trans = None):
     if exists(trans):
         img = trans(img)
     return img
+
+def set_seed(seed = 3407):
+    '''
+        Set a given random seed.
+    '''
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True 

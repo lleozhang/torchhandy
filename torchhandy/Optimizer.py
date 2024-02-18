@@ -5,7 +5,7 @@ class Optimizer(object):
     def __init__(self, parameters, lr, config):
         '''
             supported optimizer types: sgd, Adam, AdamW
-        '''
+        '''  
         if config.optimizer_type == 'sgd':
             self.optimizer = SGD(parameters, 
                                  lr = lr,

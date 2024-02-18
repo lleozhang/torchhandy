@@ -22,7 +22,7 @@ class EMA(object):
     def update(self, model):
         self.total_steps += 1
         if self.total_steps % self.step_range != 0:
-            return
+            return model
         for name, para in model.named_parameters():
             if name not in self.shadow:
                 raise ValueError("unexpected model parameter!")
