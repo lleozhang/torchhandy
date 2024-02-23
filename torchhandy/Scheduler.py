@@ -1,5 +1,6 @@
 from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR, ConstantLR
 from .utils import exists
+import math
 
 # Code Referenced From LAVIS
 def cosine_lr_schedule(optimizer, epoch, max_epoch, init_lr, min_lr):
@@ -38,8 +39,7 @@ class LinearWarmupCosineLRScheduler():
         self.warmup_start_lr = warmup_start_lr if warmup_start_lr >= 0 else init_lr
 
     def step(self, cur_epoch, cur_step):
-        # assuming the warmup iters less than one epoch
-        if cur_epoch == 0:
+        if cur_step < self.warmup_steps:
             warmup_lr_schedule(
                 step=cur_step,
                 optimizer=self.optimizer,
@@ -55,6 +55,8 @@ class LinearWarmupCosineLRScheduler():
                 init_lr=self.init_lr,
                 min_lr=self.min_lr,
             )
+    def state_dict(self):
+        return {}
 
 class Scheduler(object):
     def __init__(self, optimizer, config):
@@ -74,6 +76,6 @@ class Scheduler(object):
         else:
             self.scheduler = None
         
-    def step(self):
+    def step(self, **kwargs):
         if exists(self.scheduler):
-            self.scheduler.step()
+            self.scheduler.step(**kwargs)
