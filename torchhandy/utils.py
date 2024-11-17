@@ -123,10 +123,11 @@ def timer_func(func):
     '''
     def call(*args, **kwargs):
         st = time.time()
-        func(*args, **kwargs)
+        ret = func(*args, **kwargs)
         ed = time.time()
         dur = ed - st
         print(f"time {dur} seconds costed, which is {dur / 60} minutes or {dur / 3600} hours")
+        return ret
     return call
 
 def cuda_timer_func(func):
